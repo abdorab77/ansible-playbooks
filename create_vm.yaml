@@ -1,0 +1,43 @@
+---
+- name: Create a Virtual Machine (VM) using IBMIM
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Create a new VM
+      uri:
+        url: "https://192.168.1.119"  # Replace with IBMIM endpoint
+        method: POST
+        headers:
+          Authorization: "Bearer {{ P@ssw0rd }}"  # Use Tower credential for the token
+          Content-Type: "application/json"
+        body:
+          name: "{{ IBMIM-test }}"                   # VM name as a variable
+          cpu: "{{ 2 }}"                     # CPU cores
+          memory: "{{ 2 }}"               # Memory in MB
+          storage:                                 # Storage disks
+            - size: "{{ 10 }}"          # Disk size in GB
+          network:                                # Network details
+            - type: "dhcp"                        # Use DHCP for IP assignment
+        body_format: json
+        return_content: yes
+      register: vm_creation_response
+
+    - name: Show VM creation response
+      debug:
+        var: vm_creation_response.json
+
+    - name: Wait for VM to become active
+      uri:
+        url: "https://192.168.1.119{{ vm_creation_response.json.id }}"  # Replace with status endpoint
+        method: GET
+        headers:
+          Authorization: "Bearer {{ P@ssw0rd }}"
+        register: vm_status
+        until: vm_status.json.state == "active"  # Check for active state
+        retries: 10
+        delay: 15
+
+    - name: Confirm VM is active
+      debug:
+        msg: "VM {{ IBMIM-test }} is successfully created and active."
+
