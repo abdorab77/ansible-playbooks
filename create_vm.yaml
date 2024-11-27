@@ -13,7 +13,7 @@
         body:
           name: "{{ IBMIM-test }}"                   # VM name as a variable
           cpu: "{{ 2 }}"                     # CPU cores
-          memory: "{{ 2 }}"               # Memory in MB
+          memory: "{{ 2000 }}"               # Memory in MB
           storage:                                 # Storage disks
             - size: "{{ 10 }}"          # Disk size in GB
           network:                                # Network details
